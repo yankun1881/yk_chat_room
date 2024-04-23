@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 - yk Chat Room</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>注册</h1>
+        <form id="registerForm">
+            <label for="newNickname">昵称：</label>
+            <input id="newNickname" type="text">
+            <label for="newPassword">密码：</label>
+            <input id="newPassword" type="password">
+            <label for="confirmPassword">确认密码：</label>
+            <input id="confirmPassword" type="password">
+            <button id="registerBtn" type="button">注册</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById("registerBtn").addEventListener("click", function() {
+            var newNickname = document.getElementById('newNickname').value.trim();
+            var newPassword = document.getElementById('newPassword').value.trim();
+            var confirmPassword = document.getElementById('confirmPassword').value.trim();
+            if (!newNickname || !newPassword || !confirmPassword) {
+                alert("请输入昵称和密码");
+                return;
+            }
+            if (newPassword !== confirmPassword) {
+                alert("密码和确认密码不匹配");
+                return;
+            }
+            
+            // 建立 WebSocket 连接
+            var socket = new WebSocket("ws://106.54.20.64:8081/yk/chat");
+            // 监听 WebSocket 连接建立成功事件
+            socket.onerror = function() {
+                console.error('连接服务器失败，请刷新页面', error);
+            }
+            socket.onopen = function(event) {
+                console.log("WebSocket 连接已建立");
+                var data = {
+                    type: "register",
+                    name: newNickname,
+                    password: newPassword
+                };
+                socket.send(JSON.stringify(data));
+            };
+
+            // 监听 WebSocket 接收消息事件
+            socket.onmessage = function(event) {
+                var response = JSON.parse(event.data);
+                if (response.result === "200") {
+                    // 登录成功，重定向到聊天页面
+                    sessionStorage.setItem('name', name);
+                    alert("注册成功！请登录。");
+                    window.location.href = "login.html"; // 注册成功后重定向到登录页面
+                } else {
+                    alert("注册失败:该用户名已被注册");
+                }
+            };
+
+            // 监听 WebSocket 连接关闭事件
+            socket.onclose = function(event) {
+                console.log("WebSocket 连接已关闭");
+            };
+            
+
+            
+        });
+    </script>
+</body>
+</html>

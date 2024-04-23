@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 聊天室</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>登录</h1>
+        <form id="loginForm">
+            <label for="nickname">昵称：</label>
+            <input id="name" type="text">
+            <label for="password">密码：</label>
+            <input id="password" type="password">
+            <button id="loginBtn" type="button">登录</button>
+        </form>
+        <button id="registerRedirectBtn" type="button">注册</button>
+    </div>
+
+    <script>
+        document.getElementById("loginBtn").addEventListener("click", function() {
+            var name = document.getElementById('name').value.trim();
+            var password = document.getElementById('password').value.trim();
+            if (!name || !password) {
+                alert("请输入昵称和密码");
+                return;
+            }
+            // 建立 WebSocket 连接
+            var socket = new WebSocket("ws://106.54.20.64:8081/yk/chat");
+            // 监听 WebSocket 连接建立成功事件
+            socket.onerror = function() {
+                console.error('连接服务器失败，请刷新页面', error);
+            }
+            socket.onopen = function(event) {
+                console.log("WebSocket 连接已建立");
+                var data = {
+                    type: "login",
+                    name: name,
+                    password: password
+                };
+                socket.send(JSON.stringify(data));
+            };
+
+            // 监听 WebSocket 接收消息事件
+            socket.onmessage = function(event) {
+                var response = JSON.parse(event.data);
+                if (response.result === "200") {
+                    // 登录成功，重定向到聊天页面
+                    sessionStorage.setItem('name', name);
+                    window.location.href = "chat.html";
+                } else {
+                    alert("登录失败，请检查用户名和密码是否正确");
+                }
+            };
+
+            // 监听 WebSocket 连接关闭事件
+            socket.onclose = function(event) {
+                console.log("WebSocket 连接已关闭");
+            };
+        });
+
+
+        document.getElementById("registerRedirectBtn").addEventListener("click", function() {
+            // 点击注册按钮时重定向到注册页面
+            window.location.href = "register.html";
+        });
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+            .then(function(registration) {
+                console.log('Service Worker 注册成功:', registration);
+            })
+            .catch(function(error) {
+                console.error('Service Worker 注册失败:', error);
+            });
+        }
+    </script>
+</body>
+</html>

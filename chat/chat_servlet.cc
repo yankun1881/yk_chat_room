@@ -1,7 +1,7 @@
 #include "chat_servlet.h"
 #include "yk/log.h"
 #include "protocol.h"
-
+#include "db/users/usersCtr.h"
 namespace chat {
 
 static yk::Logger::ptr g_logger = YK_LOG_ROOT();
@@ -144,6 +144,30 @@ int32_t ChatWSServlet::handle(yk::http::HttpRequest::ptr header
         nty->set("name", id);
         nty->set("msg", m);
         session_notify(nty, nullptr);
+        return SendMessage(session, rsp);
+    }else if(type == "login"){
+        chat::UserController u;
+        if(u.NameByPassword(msg->get("name"),msg->get("password"))){
+            header->setHeader("$id", id);
+            rsp->set("result", "200");
+            rsp->set("msg", "ok");
+        }else{
+            header->setHeader("$id", id);
+            rsp->set("result", "201");
+            rsp->set("msg", "error");
+        }
+        return SendMessage(session, rsp);
+    }else if(type == "register"){
+        chat::UserController u;
+        if(u.createUsers(msg->get("name"),msg->get("password"))){
+            header->setHeader("$id", id);
+            rsp->set("result", "200");
+            rsp->set("msg", "ok");
+        }else{
+            header->setHeader("$id", id);
+            rsp->set("result", "201");
+            rsp->set("msg", "昵称已被注册");
+        }
         return SendMessage(session, rsp);
     }
     return 0;

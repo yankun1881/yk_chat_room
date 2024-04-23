@@ -22,7 +22,6 @@ int32_t ResourceServlet::handle(yk::http::HttpRequest::ptr request
     }else{
         path = m_path;
     }
-    path += request->getPath();
     YK_LOG_INFO(g_logger) << "handle path=" << path;
     if(path.find("..") != std::string::npos) {
         response->setBody("invalid path");
@@ -43,7 +42,18 @@ int32_t ResourceServlet::handle(yk::http::HttpRequest::ptr request
     }
     ifs.close();
     response->setBody(ss.str());
-    response->setHeader("content-type", "text/html;charset=utf-8");
+    std::string s;
+    for(size_t k = path.size()-1; k != 0; --k){
+        if(path[k] == '.'){
+            s = std::string(path.begin()+k+1,path.end());
+            break;
+        }
+    }
+    if(s == "js"){
+        response->setHeader("content-type", "text/javascript;charset=utf-8");
+    }else{
+        response->setHeader("content-type", "text/"+s+";charset=utf-8");
+    }
     return 0;
 }
 

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天 - yk Chat Room</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <h1>yk Chat Room</h1>
+    <div id="nicknameDisplay"></div>
+    <div id="message"></div>
+
+    <div id="chatForm" style="display: none;">
+        <label for="chatMsg">聊天信息：</label>
+        <input id="chatMsg" type="text">
+        <button id="sendBtn">发送</button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var websocket = new WebSocket("ws://106.54.20.64:8081/yk/chat");
+            var messageContainer = document.getElementById("message");
+            // 从 sessionStorage 中获取用户的昵称
+            var userName = sessionStorage.getItem('name');
+            function showMessage(msg) {
+                messageContainer.innerHTML += msg + "<br/>";
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+            }
+
+            websocket.onerror = function() {
+                showMessage("连接错误");
+            }
+            websocket.onopen = function() {
+                    var loginData = {
+                        type: "login_request",
+                        name: userName
+                    };
+                    websocket.send(JSON.stringify(loginData));
+                    document.getElementById("chatForm").style.display = "block"; // 显示聊天表单
+            }
+            websocket.onmessage = function(e) {
+                var data = JSON.parse(e.data);
+                switch (data.type) {
+                    case "user_enter":
+                        showMessage("[" + data.time + "][" + data.name + "] 加入聊天室");
+                        break;
+                    case "user_leave":
+                        showMessage("[" + data.time + "][" + data.name + "] 离开聊天室");
+                        break;
+                    case "msg":
+                        showMessage("[" + data.time + "][" + data.name + "] " + data.msg);
+                        break;
+                    case "login_response":
+                        showMessage("[" + data.result + "][" + data.msg + "]");
+                        break;
+                }
+            }
+
+            websocket.onclose = function() {
+                showMessage("服务器断开");
+            }
+
+            function sendMessage() {
+                var msgInput = document.getElementById('chatMsg');
+                var message = msgInput.value.trim();
+                if (!message) {
+                    alert("请输入消息");
+                    return;
+                }
+
+                var messageData = {
+                    type: "send_request",
+                    msg: message
+                };
+                websocket.send(JSON.stringify(messageData));
+                msgInput.value = '';
+            }
+
+            document.getElementById("sendBtn").addEventListener("click", sendMessage);
+        });
+    </script>
+</body>
+</html>
