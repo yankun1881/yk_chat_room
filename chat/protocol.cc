@@ -26,11 +26,19 @@ ChatMessage::ChatMessage() {
 
 std::string ChatMessage::get(const std::string& name) {
     auto it = m_datas.find(name);
-    return it == m_datas.end() ? "" : it->second;
+    if(it == m_datas.end()){
+        return "";
+    }
+    auto& v = m_datas[name];
+    if(v.isString()) {
+        return v.asString();
+    }
+    return "";
 }
 
 void ChatMessage::set(const std::string& name, const std::string& val) {
-    m_datas[name] = val;
+    Json::Value value(val);
+    m_datas[name] = value;
 }
 
 std::string ChatMessage::toString() const {
@@ -39,11 +47,27 @@ std::string ChatMessage::toString() const {
         json[i.first] = i.second;
     }    
     Json::StreamWriterBuilder builder;
+    
+    builder["indentation"] = ""; // 禁止缩进
+    builder["enableYAMLCompatibility"] = true; // 启用 YAML 兼容模式
+    builder["emitUTF8"] = true; // 确保输出 UTF-8 编码，这通常是默认设置
     std::ostringstream oss;
     std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
     writer->write(json, &oss);
     
     return oss.str();
+}
+void ChatMessage::addDataArray(const std::vector<std::map<std::string, std::string>>& dataArray,const std::string& data) {
+    Json::Value dataJson(Json::arrayValue); // 创建一个JSON数组
+
+    for (const auto& dataItem : dataArray) {
+        Json::Value itemJson; // 创建一个JSON对象用于存放单个数据项
+        for (const auto& kv : dataItem) {
+            itemJson[kv.first] = kv.second; // 添加键值对到对象
+        }
+        dataJson.append(itemJson); // 将对象添加到数组
+    }
+    m_datas[data] = dataJson;
 }
 
 

@@ -4,6 +4,9 @@
 #include <string>
 #include <map>
 #include <memory>
+#include <vector>
+#include <jsoncpp/json/json.h>
+
 
 namespace chat {
 
@@ -16,8 +19,9 @@ public:
     std::string get(const std::string& name);
     void set(const std::string& name, const std::string& val);
     std::string toString() const;
+    void addDataArray(const std::vector<std::map<std::string, std::string>>& dataArray,const std::string & data = "data");
 private:
-    std::map<std::string, std::string> m_datas;
+    std::map<std::string, Json::Value> m_datas;
 };
 
 }

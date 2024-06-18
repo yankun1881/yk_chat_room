@@ -21,7 +21,7 @@ void UserController::getUsersQuery(std::vector<Users>& dates,const std::string& 
     }
     ss << ";";
     YK_LOG_INFO(g_logger) << "sql : " << ss.str();
-    yk::SQLMgr::GetInstance()->processQueryResult<chat::Users>(dates,ss.str(),getdate);
+    yk::ConnPoolMgr::GetInstance()->getConn()->processQueryResult<chat::Users>(dates,ss.str(),getdate);
 }
 //验证name和password是否正确
 bool UserController::NameByPassword(const std::string& name,const std::string& password){
@@ -48,7 +48,7 @@ bool UserController::createUsers(const std::string& name,const std::string& pass
     }
     std::stringstream ss;
     ss <<"INSERT INTO users (name, status, password) VALUES ('" << name << "', 1, '"<<password<<"');";
-    yk::SQLMgr::GetInstance()->addData(ss.str());
+    yk::ConnPoolMgr::GetInstance()->getConn()->addData(ss.str());
     return true;
 }
 

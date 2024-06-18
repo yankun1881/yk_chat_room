@@ -51,9 +51,16 @@ int32_t ResourceServlet::handle(yk::http::HttpRequest::ptr request
     }
     if(s == "js"){
         response->setHeader("content-type", "text/javascript;charset=utf-8");
+    }else if(s == "png"){
+        response->setHeader("content-type", "image/png");
+    }else if(s == "svg"){
+        response->setHeader("content-type", "image/svg+xml");
     }else{
         response->setHeader("content-type", "text/"+s+";charset=utf-8");
     }
+    response->setHeader("X-Content-Type-Options", "nosniff");
+    response->setHeader("Cache-Control", "public, max-age=3600");
+
     return 0;
 }
 

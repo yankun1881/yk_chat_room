@@ -2,8 +2,9 @@
 #include "chat_servlet.h"
 #include "resource_servlet.h"
 #include "myModule.h"
-
+#include "chatCtr.h"
 namespace chat {
+    
 
 // 定义日志记录器
 static yk::Logger::ptr g_logger = YK_LOG_ROOT();
@@ -25,6 +26,25 @@ bool MyModule::onUnload() {
     return true;
 }
 
+void MyModule::readfile(const std::string& uri,const std::string& path,const std::string& suffix){
+    yk::FSUtil::ListAllFile(files, path, suffix);
+    size_t usize = uris.size();
+    size_t fsize = files.size();
+    uris.resize(fsize);
+    for(size_t i = usize; i < fsize; ++i){
+        uris[i] = uri;
+        std::string s;
+        for(size_t k = files[i].size()-1; k != 0; --k){
+            if(files[i][k] == '/'){
+                s = std::string(files[i].begin()+k,files[i].end());
+                break;
+            }
+        }
+        uris[i] += s;
+    }
+    
+}
+
 // 服务器准备就绪时执行的函数
 bool MyModule::onServerReady() {
     YK_LOG_INFO(g_logger) << "onServerReady";
@@ -35,50 +55,22 @@ bool MyModule::onServerReady() {
         YK_LOG_INFO(g_logger) << "no httpserver alive";
         return false;
     }
+    //添加html页面下面的
     std::string path = yk::EnvMgr::GetInstance()->getCwd();
     path+="html/";
-    std::vector<std::string> files;
-    yk::FSUtil::ListAllFile(files, path, ".html");
-    size_t fsize = files.size();
-    std::vector<std::string> uri;
-    uri.resize(files.size());
-    for(size_t i = 0; i < fsize; ++i){
-        uri[i] = "/html";
-        std::string s;
-        for(size_t k = files[i].size()-1; k != 0; --k){
-            if(files[i][k] == '/'){
-                s = std::string(files[i].begin()+k,files[i].end());
-                break;
-            }
-        }
-        uri[i] += s;
-    }
-    yk::FSUtil::ListAllFile(files, path+"css/", ".css");
-    uri.resize(files.size());
-    for(size_t i = fsize; i < files.size(); ++i){
-        uri[i] = "/html/css";
-        std::string s;
-        for(size_t k = files[i].size()-1; k != 0; --k){
-            if(files[i][k] == '/'){
-                s = std::string(files[i].begin()+k,files[i].end());
-                break;
-            }
-        }
-        uri[i] += s;
-    }
-    fsize = files.size();
-    yk::FSUtil::ListAllFile(files, path+"js/", ".js");
-    for(size_t i = fsize; i < files.size(); ++i){
-        uri[i] = "/html/js";
-        std::string s;
-        for(size_t k = files[i].size()-1; k != 0; --k){
-            if(files[i][k] == '/'){
-                s = std::string(files[i].begin()+k,files[i].end());
-                break;
-            }
-        }
-        uri[i] += s;
-    }
+    readfile("/html",path,".html");
+    readfile("/html/css",path+"css/",".css");
+    readfile("/html/js",path+"js/",".js");
+    path = yk::EnvMgr::GetInstance()->getCwd();
+    path+="dist/";
+    yk::FSUtil::ListAllFile(files, path,".html");
+    uris.push_back("/");
+    readfile("",path,".html");
+    readfile("",path,".png");
+    readfile("",path,".svg");
+    readfile("/assets",path+"assets/",".css");
+    readfile("/assets",path+"assets/",".js");
+    
     std::vector<yk::http::ResourceServlet::ptr> slts(files.size());
     for(size_t i = 0; i < files.size();++i){
         slts[i].reset(new yk::http::ResourceServlet(files[i]));
@@ -93,8 +85,8 @@ bool MyModule::onServerReady() {
         auto slt_dispatch = http_server->getServletDispatch();
         // 创建资源处理 Servlet 并添加到 ServletDispatch 中
         for(size_t j = 0; j < files.size(); ++j) {
-            slt_dispatch->addServlet(uri[j], slts[j]);
-            YK_LOG_INFO(g_logger) << "addServlet";
+            slt_dispatch->addServlet(uris[j], slts[j]);
+            YK_LOG_INFO(g_logger) << "addServlet: " << uris[j];
         }
         
     }
@@ -117,6 +109,32 @@ bool MyModule::onServerReady() {
         ChatWSServlet::ptr slt(new ChatWSServlet);
         slt_dispatch->addServlet("/yk/chat", slt);
     }
+    chatCtr::GetInstance()->sercive["login_request"] = [](yk::http::HttpRequest::ptr header, yk::http::WSSession::ptr session, chat::ChatMessage::ptr message) {
+        return chatCtr::GetInstance()->login_request(header, session, message);
+    };
+    chatCtr::GetInstance()->sercive["send_request"] = [](yk::http::HttpRequest::ptr header, yk::http::WSSession::ptr session, chat::ChatMessage::ptr message) {
+        return chatCtr::GetInstance()->send_request(header, session, message);
+    };
+
+    chatCtr::GetInstance()->sercive["login"] = [](yk::http::HttpRequest::ptr header, yk::http::WSSession::ptr session, chat::ChatMessage::ptr message) {
+        return chatCtr::GetInstance()->login(header, session, message);
+    };
+
+    chatCtr::GetInstance()->sercive["register"] = [](yk::http::HttpRequest::ptr header, yk::http::WSSession::ptr session, chat::ChatMessage::ptr message) {
+        return chatCtr::GetInstance()->registe(header, session, message);
+    };
+
+    chatCtr::GetInstance()->sercive["message_request"] = [](yk::http::HttpRequest::ptr header, yk::http::WSSession::ptr session, chat::ChatMessage::ptr message) {
+        return chatCtr::GetInstance()->message_request(header, session, message);
+    };
+
+    chatCtr::GetInstance()->sercive["user_leave"] = [](yk::http::HttpRequest::ptr header, yk::http::WSSession::ptr session, chat::ChatMessage::ptr message) {
+        return chatCtr::GetInstance()->user_leave(header, session, message);
+    };
+    chatCtr::GetInstance()->sercive["erase"] = [](yk::http::HttpRequest::ptr header, yk::http::WSSession::ptr session, chat::ChatMessage::ptr message) {
+        return chatCtr::GetInstance()->erase(header, session, message);
+    };
+    
     return true;
 }
 

@@ -19,6 +19,8 @@ set(CHAT_SRC
     chat/protocol.cc
     chat/resource_servlet.cc
     chat/db/users/usersCtr.cc
+    chat/db/messages/messagesCtr.cc
+    chat/chatCtr.cc
 )
 
 # 创建包含所有功能的 chat 库
@@ -33,11 +35,13 @@ target_include_directories(chat PUBLIC
     ${JSONCPP_INCLUDE_DIRS}
 )
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-# 链接 chat 库到 chat_room 可执行文件
-add_executable(chat_room chat_room.cc)
-# 将 chat 库链接到 chat_room 可执行文件
-target_link_libraries(chat_room PUBLIC chat)
 
+add_executable(chat_room chat_room.cc)
+
+add_executable(test test.cc)
+
+target_link_libraries(chat_room PUBLIC chat)
+target_link_libraries(test PUBLIC chat)
 # 链接所有依赖项到 chat 库中
 target_link_libraries(chat PUBLIC 
     ${YK_LIBS} 
