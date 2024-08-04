@@ -17,4 +17,19 @@ public:
 
 };
 
+class MyRockModule : public yk::RockModule {
+public:
+    MyRockModule(): yk::RockModule("","1.0",""){}
+    MyRockModule(const std::string& name, const std::string& version, const std::string& filename)
+        : yk::RockModule(name, version, filename) {}
+
+    virtual bool handleRockRequest(yk::RockRequest::ptr request,
+                                   yk::RockResponse::ptr response,
+                                   yk::RockStream::ptr stream) override;
+
+    virtual bool handleRockNotify(yk::RockNotify::ptr notify,
+                                  yk::RockStream::ptr stream) override ;
+};
+
+
 } // namespace chat 

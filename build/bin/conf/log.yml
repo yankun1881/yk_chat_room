@@ -3,11 +3,11 @@ logs:
       level: INFO
       appenders:
           - type: FileLogAppender
-            file: root_log.txt
+            file: root_log/
           - type: StdoutLogAppender
     - name: system
       level: DEBUG
       appenders:
           - type: FileLogAppender
-            file: system_log.txt
+            file: system_log/ 
           - type: StdoutLogAppender

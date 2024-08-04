@@ -3,6 +3,7 @@
 
 #include <yk.h>
 namespace chat {
+    
 class ChatWSServlet : public yk::http::WSServlet {
 public:
     typedef std::shared_ptr<ChatWSServlet> ptr;

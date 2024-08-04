@@ -109,6 +109,7 @@ bool MyModule::onServerReady() {
         ChatWSServlet::ptr slt(new ChatWSServlet);
         slt_dispatch->addServlet("/yk/chat", slt);
     }
+    
     chatCtr::GetInstance()->sercive["login_request"] = [](yk::http::HttpRequest::ptr header, yk::http::WSSession::ptr session, chat::ChatMessage::ptr message) {
         return chatCtr::GetInstance()->login_request(header, session, message);
     };
@@ -143,6 +144,34 @@ bool MyModule::onServerUp() {
     YK_LOG_INFO(g_logger) << "onServerUp";
     return true;
 }
+
+bool MyRockModule::handleRockRequest(yk::RockRequest::ptr request,
+                                yk::RockResponse::ptr response,
+                                yk::RockStream::ptr stream)  {
+    // 处理请求的逻辑
+
+    std::string s = request->getBody();
+    size_t pos = s.find(' ');
+    std::string name(s.begin(),s.begin()+pos);
+    std::string message(s.begin()+pos+1,s.end());
+    chatCtr::GetInstance()->send_request(name,message);
+
+    response->setCmd(100);
+    response->setResult(1);
+    response->setResultStr("yes");
+    return true; // 返回处理结果
+}
+
+bool MyRockModule::handleRockNotify(yk::RockNotify::ptr notify,
+                                yk::RockStream::ptr stream)  {
+    // 处理通知的逻辑
+
+
+    return true; // 返回处理结果
+}
+
+
+
 
 } // namespace chat
 

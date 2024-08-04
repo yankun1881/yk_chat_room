@@ -31,6 +31,7 @@ public:
                             ,yk::http::WSSession::ptr session,ChatMessage::ptr msg);    
     int32_t erase(yk::http::HttpRequest::ptr header
                             ,yk::http::WSSession::ptr session,ChatMessage::ptr msg);
+    int32_t send_request(std::string name,std::string msg);
 public:
     std::map<std::string,std::function<int32_t(yk::http::HttpRequest::ptr header
                             ,yk::http::WSSession::ptr session,ChatMessage::ptr msg)>> sercive;

@@ -8,6 +8,18 @@ set(MySQLCppCONN_INCLUDE_DIRS "/usr/include/cppconn")
 set(MySQLCppCONN_LIBRARIES "/usr/lib/x86_64-linux-gnu/libmysqlcppconn.so")
 include_directories(${MySQLCppCONN_INCLUDE_DIRS})
 
+# hiredis的动态库
+set(hiredis "/usr/lib/x86_64-linux-gnu/libhiredis.so")
+
+# 添加redis++的动态库
+set(redis++ "/home/ubuntu/redis-plus-plus/build/libredis++.so")
+
+# 添加 redis++ 库的包含目录
+include_directories("/home/ubuntu/redis-plus-plus/src")
+
+# zookeeper
+set(zookeeper "/usr/lib/x86_64-linux-gnu/libzookeeper_mt.so")
+
 find_package(yaml-cpp REQUIRED)
 find_package(jsoncpp REQUIRED)
 find_package(OpenSSL REQUIRED)
@@ -33,6 +45,7 @@ target_include_directories(chat PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     /home/ubuntu/myServer2
     ${JSONCPP_INCLUDE_DIRS}
+   
 )
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
@@ -44,9 +57,12 @@ target_link_libraries(chat_room PUBLIC chat)
 target_link_libraries(test PUBLIC chat)
 # 链接所有依赖项到 chat 库中
 target_link_libraries(chat PUBLIC 
-    ${YK_LIBS} 
-    ${MySQLCppCONN_LIBRARIES}
+    
+    ${redis++}
+    ${YK_LIBS}
+    ${MySQLCppCONN_LIBRARIES} 
     yaml-cpp 
+    ${zookeeper}
     jsoncpp_lib 
     OpenSSL::SSL 
     OpenSSL::Crypto

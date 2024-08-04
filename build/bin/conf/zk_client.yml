@@ -1,0 +1,4 @@
+zk_client: 
+  ip: 127.0.0.1
+  port: 2183
+  timeout: 2000
