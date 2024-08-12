@@ -20,6 +20,7 @@ public:
     void set(const std::string& name, const std::string& val);
     std::string toString() const;
     void addDataArray(const std::vector<std::map<std::string, std::string>>& dataArray,const std::string & data = "data");
+    static std::string toDataArray(const std::vector<std::map<std::string, std::string>>& dataArray);
 private:
     std::map<std::string, Json::Value> m_datas;
 };

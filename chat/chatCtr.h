@@ -10,7 +10,7 @@ namespace chat {
 class ChatCtr{
 public:
     typedef std::shared_ptr<ChatCtr> ptr;
-    ChatCtr(){}
+    ChatCtr();
     void session_del(const std::string& id) ;
     bool session_exists(const std::string& id) ;
     void session_add(const std::string& id, yk::http::WSSession::ptr session);
@@ -38,6 +38,7 @@ public:
     yk::RWMutex m_mutex;
     std::map<std::string, yk::http::WSSession::ptr> m_sessions;
     std::atomic<long long> lid;
+    yk::RockClient::ptr RCli;
 };
 
 typedef yk::Singleton<ChatCtr> chatCtr;

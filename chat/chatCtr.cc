@@ -1,10 +1,14 @@
 #include"chatCtr.h"
 
+#include "yk.h"
 #include "db/users/usersCtr.h"
 #include "db/messages/messagesCtr.h"
 namespace chat{
 static yk::Logger::ptr g_logger = YK_LOG_ROOT();
-
+ChatCtr::ChatCtr()
+    {
+        RCli.reset(new yk::RockClient("123.60.70.219",8062));
+}
 bool ChatCtr::session_exists(const std::string& id) {
     YK_LOG_INFO(g_logger) << "session_exists id=" << id;
     yk::RWMutex::ReadLock lock(m_mutex);
@@ -139,6 +143,7 @@ int32_t ChatCtr::send_request(yk::http::HttpRequest::ptr header
     nty->set("id",std::to_string(++lid));   //前端需求的id，进行消息排序
     MessagesController::addMessage(id,m);   //消息存入数据库
     session_notify(nty, nullptr);           //广播
+    RCli->sendMessage(100,id+" "+m);
     return SendMessage(session, rsp);
 }
 

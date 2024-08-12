@@ -71,6 +71,10 @@ bool MyModule::onServerReady() {
     readfile("/assets",path+"assets/",".css");
     readfile("/assets",path+"assets/",".js");
     
+    readfile("/css",path+"css/",".css");
+    readfile("/js",path+"js/",".js");
+    readfile("/img",path+"img/",".png");
+    readfile("/img",path+"img/",".jpg");
     std::vector<yk::http::ResourceServlet::ptr> slts(files.size());
     for(size_t i = 0; i < files.size();++i){
         slts[i].reset(new yk::http::ResourceServlet(files[i]));
@@ -88,8 +92,15 @@ bool MyModule::onServerReady() {
             slt_dispatch->addServlet(uris[j], slts[j]);
             YK_LOG_INFO(g_logger) << "addServlet: " << uris[j];
         }
-        
+
+        yk::http::getFriendListServlet::ptr getFriendDate(new yk::http::getFriendListServlet);
+        slt_dispatch->addServlet("/friend/friendList",getFriendDate);
+        yk::http::getFriendMsgServlet::ptr getFriendMsgDate(new yk::http::getFriendMsgServlet);
+        slt_dispatch->addServlet("/friend/chatMsg",getFriendMsgDate);
     }
+
+    
+    
 
     // 清空服务器列表
     svrs.clear();

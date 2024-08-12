@@ -18,6 +18,26 @@ private:
     std::string m_path;
 };
 
+class getFriendListServlet :public yk::http::Servlet {
+public:
+    typedef std::shared_ptr<getFriendListServlet> ptr;
+    getFriendListServlet();
+    virtual int32_t handle(yk::http::HttpRequest::ptr request
+                   , yk::http::HttpResponse::ptr response
+                   , yk::http::HttpSession::ptr session) override;
+
+};
+
+class getFriendMsgServlet :public yk::http::Servlet {
+public:
+    typedef std::shared_ptr<getFriendMsgServlet> ptr;
+    getFriendMsgServlet();
+    virtual int32_t handle(yk::http::HttpRequest::ptr request
+                   , yk::http::HttpResponse::ptr response
+                   , yk::http::HttpSession::ptr session) override;
+
+};
+
 }
 }
 

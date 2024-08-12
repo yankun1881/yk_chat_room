@@ -70,5 +70,26 @@ void ChatMessage::addDataArray(const std::vector<std::map<std::string, std::stri
     m_datas[data] = dataJson;
 }
 
+std::string ChatMessage::toDataArray(const std::vector<std::map<std::string, std::string>>& dataArray){
+    Json::Value dataJson(Json::arrayValue); // 创建一个JSON数组
+    for (const auto& dataItem : dataArray) {
+        Json::Value itemJson; // 创建一个JSON对象用于存放单个数据项
+        for (const auto& kv : dataItem) {
+            itemJson[kv.first] = kv.second; // 添加键值对到对象
+        }
+        dataJson.append(itemJson); // 将对象添加到数组
+    }
+    Json::StreamWriterBuilder builder;
+    
+    builder["indentation"] = ""; // 禁止缩进
+    builder["enableYAMLCompatibility"] = true; // 启用 YAML 兼容模式
+    builder["emitUTF8"] = true; // 确保输出 UTF-8 编码，这通常是默认设置
+    std::ostringstream oss;
+    std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+    writer->write(dataJson, &oss);
+    
+    return oss.str();
+}
+
 
 }

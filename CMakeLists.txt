@@ -33,6 +33,8 @@ set(CHAT_SRC
     chat/db/users/usersCtr.cc
     chat/db/messages/messagesCtr.cc
     chat/chatCtr.cc
+    chat/db/user/userCtr.cc
+    chat/db/chat_message/chat_messageCtr.cc   
 )
 
 # 创建包含所有功能的 chat 库
